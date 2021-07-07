@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
+from django.shortcuts import get_list_or_404, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -6,7 +7,7 @@ from django.db.models import Count
 from .forms import PostForm, CommentForm
 from django.views.decorators.cache import cache_page
 
-from .models import Post, Group, User
+from .models import Post, Group, User, Follow
 
 
 def make_pagination(request, object_list, per_page):
@@ -47,15 +48,26 @@ def group_posts(request, slug):
 
 
 def profile(request, username):
-    profile = get_object_or_404(
-        User.objects.annotate(posts_count=Count('posts')),
+    author = get_object_or_404(
+        User,
         username=username
     )
-    posts = profile.posts.all()
-    post_count = profile.posts_count
+    posts = author.posts.all()
+    post_count = posts.count()
     page = make_pagination(request, posts, 10)
 
-    context = {'profile': profile, 'page': page, 'post_count': post_count}
+    user = request.user
+    is_following = (
+        user.is_authenticated
+        and author.following.filter(user__username=user.username).exists()
+    )
+
+    context = {
+        'profile': author,
+        'page': page,
+        'post_count': post_count,
+        'is_following': is_following
+    }
     return render(request, 'posts/profile.html', context)
 
 
@@ -159,9 +171,9 @@ def post_edit(request, username, post_id):
 
 @login_required
 def follow_index(request):
-    # информация о текущем пользователе доступна в переменной request.user
-    # ...
-    post_list = Post.objects.all()
+    user = request.user
+    followers = user.follower.values_list('author', flat=True)
+    post_list = Post.objects.filter(author__id__in=followers)
     page = make_pagination(request, post_list, 10)
     context = {'page': page}
     return render(request, 'posts/follow.html', context)
@@ -169,9 +181,20 @@ def follow_index(request):
 
 @login_required
 def profile_follow(request, username):
-    pass
+    path = reverse('posts:profile', kwargs={'username': username})
+    author = get_object_or_404(User, username=username)
+    user = request.user
+    if author != user:
+        Follow.objects.get_or_create(user=user, author=author)
+    return redirect(path)
 
 
 @login_required
 def profile_unfollow(request, username):
-    pass
+    path = reverse('posts:profile', kwargs={'username': username})
+    author = get_object_or_404(User, username=username)
+    user = request.user
+
+    follow = get_object_or_404(Follow, user=user, author=author)
+    follow.delete()
+    return redirect(path)
