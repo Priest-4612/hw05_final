@@ -155,3 +155,23 @@ def post_edit(request, username, post_id):
     }
 
     return render(request, 'posts/new_post.html', context)
+
+
+@login_required
+def follow_index(request):
+    # информация о текущем пользователе доступна в переменной request.user
+    # ...
+    post_list = Post.objects.all()
+    page = make_pagination(request, post_list, 10)
+    context = {'page': page}
+    return render(request, 'posts/follow.html', context)
+
+
+@login_required
+def profile_follow(request, username):
+    pass
+
+
+@login_required
+def profile_unfollow(request, username):
+    pass

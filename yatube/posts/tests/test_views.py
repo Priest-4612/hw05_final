@@ -239,6 +239,9 @@ class PostViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, address_post)
 
+    def test_post_edit_view_author_get(self):
+        pass
+
 
 class PaginatorViewsTest(TestCase):
     @classmethod

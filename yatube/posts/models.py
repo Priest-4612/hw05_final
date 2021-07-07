@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from django.db.models.deletion import CASCADE
 
 User = get_user_model()
 
@@ -85,3 +84,9 @@ class Follow(models.Model):
         related_name='following',
         on_delete=models.CASCADE
     )
+
+    def __str__(self) -> str:
+        return (
+            f'Запись No: {self.pk}. Автор: {self.author} '
+            f'- Подписчик: {self.user}'
+        )

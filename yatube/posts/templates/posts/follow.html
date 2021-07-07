@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Избранные Авторы{% endblock %}
+{% block header %}Избранные Авторы{% endblock %}
+
+{% block content %}
+  {% include 'mixins/menu.html' with follow=True %}
+
+  {% for post in page %}
+    {% include 'posts/post_item.html' with post=post%}
+    {% if not forloop.last %}<hr>{% endif %}
+  {% endfor %}
+
+  {% include "mixins/paginator.html" with items=page paginator=paginator %}
+{% endblock %}
