@@ -145,8 +145,18 @@ dmypy.json
 
 .mypy_cache
 
-# папки со статикой и медиа
-static/
-yatube/posts/static/
-yatube/media/
+# Хранилище статичных файлов
+/yatube/static/*
+!/yatube/static/.gitkeep
 
+/yatube/posts/static/*
+!/yatube/posts/static/.gitkeep
+
+/yatube/sent_emails/*
+!/yatube/sent_emails/.gitkeep
+
+/yatube/media/*
+!/yatube/media/.gitkeep
+
+# игнорировать только файл TODO
+/TODO.md
