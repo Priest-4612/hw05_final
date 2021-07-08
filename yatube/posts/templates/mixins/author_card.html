@@ -20,7 +20,7 @@
           Записей: {{ post_count }}
         </div>
       </li>
-      {% if user.is_authenticated %}
+      {% if user.is_authenticated and user.pk != profile.pk %}
         <li class="list-group-item text-center">
           {% if is_following %}
             <a

@@ -39,7 +39,7 @@ class PostCreateFormTests(TestCase):
             slug='test-slug',
             description='Тестовое описание сообщества'
         )
-        cls.edit_post = Post.objects.create(
+        cls.post_edit = Post.objects.create(
             text='Редактируемый текст',
             author=cls.author
         )
@@ -104,16 +104,16 @@ class PostCreateFormTests(TestCase):
 
     def test_update_post(self):
         """Проверяем обновление поста поста."""
-        edit_post = PostCreateFormTests.edit_post
+        post_edit = PostCreateFormTests.post_edit
         form_data = {
             'text': 'Текст из формы',
             'group': self.group.pk
         }
         address_post = reverse(
-            'posts:edit_post',
+            'posts:post_edit',
             kwargs={
-                'username': edit_post.author.username,
-                'post_id': edit_post.pk
+                'username': post_edit.author.username,
+                'post_id': post_edit.pk
             }
         )
         response = self.authorized_client.post(
@@ -122,7 +122,7 @@ class PostCreateFormTests(TestCase):
             follow=True
         )
 
-        edit_post.refresh_from_db()
+        post_edit.refresh_from_db()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(edit_post.text, form_data['text'])
-        self.assertEqual(edit_post.group.pk, form_data['group'])
+        self.assertEqual(post_edit.text, form_data['text'])
+        self.assertEqual(post_edit.group.pk, form_data['group'])

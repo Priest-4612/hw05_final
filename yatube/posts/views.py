@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.shortcuts import get_list_or_404, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -55,7 +55,6 @@ def profile(request, username):
     posts = author.posts.all()
     post_count = posts.count()
     page = make_pagination(request, posts, 10)
-
     user = request.user
     is_following = (
         user.is_authenticated
@@ -113,7 +112,7 @@ def add_comment(request, username, post_id):
         'form': form,
         'comments': comments
     }
-    return render(request, 'mixins/comments.html', context)
+    return render(request, 'posts/comments.html', context)
 
 
 @login_required
@@ -161,6 +160,7 @@ def post_edit(request, username, post_id):
         return redirect(path)
 
     context = {
+        'post': post,
         'form': form,
         'title': 'Редактировать',
         'submit': 'Сохранить'

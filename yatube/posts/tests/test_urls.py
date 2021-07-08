@@ -64,7 +64,15 @@ class PostURLTests(TestCase):
             f'/{self.user.username}/{post.pk}/edit/': {
                 'template': 'posts/new_post.html',
                 'is_authorized_client': True,
-                'redirect_page': '/auth/login/?next=/test_user/1/edit/',
+                'redirect_page': (
+                    '/auth/login/?next=/'
+                    f'{self.user.username}/{post.pk}/edit/'
+                ),
+            },
+            '/follow/': {
+                'template': 'posts/follow.html',
+                'is_authorized_client': True,
+                'redirect_page': '/auth/login/?next=/follow/',
             },
         }
 

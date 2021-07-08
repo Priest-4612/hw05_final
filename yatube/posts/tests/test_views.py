@@ -87,7 +87,7 @@ class PostViewTests(TestCase):
                 'is_authorized_client': True,
                 'redirect_page': '/auth/login/?next=/new/',
             },
-            reverse('posts:edit_post', kwargs={
+            reverse('posts:post_edit', kwargs={
                 'username': self.user.username,
                 'post_id': self.post.pk
             }): {
@@ -96,6 +96,13 @@ class PostViewTests(TestCase):
                 'redirect_page': (
                     '/auth/login/?next=/'
                     f'{self.user.username}/{self.post.pk}/edit/'
+                ),
+            },
+            reverse('posts:follow_index'): {
+                'template': 'posts/follow.html',
+                'is_authorized_client': True,
+                'redirect_page': (
+                    '/auth/login/?next=/follow/'
                 ),
             },
         }
@@ -227,7 +234,7 @@ class PostViewTests(TestCase):
         у кого нет прав доступа к этой странице.
         '''
 
-        address_edit = reverse('posts:edit_post', kwargs={
+        address_edit = reverse('posts:post_edit', kwargs={
             'username': self.other_user.username,
             'post_id': self.other_post.pk
         })
@@ -239,11 +246,8 @@ class PostViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, address_post)
 
-    def test_post_edit_view_author_get(self):
-        pass
 
-
-class PaginatorViewsTest(TestCase):
+class PaginatorViewsTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -273,26 +277,18 @@ class PaginatorViewsTest(TestCase):
         self.assertEqual(len(response.context['page']), 6)
 
 
-class CacheTest(PostViewTests, TestCase):
+class CacheTests(PostViewTests, TestCase):
     def test_cache_exists(self):
+        '''
+        Проверяем наличее кешируемого фрагмента index_page на странице index
+        '''
         response = self.authorized_client.get(reverse('posts:index')) # noqa
         key = make_template_fragment_key('index_page')
         self.assertTrue(key in cache)
 
     def test_cached_index_page(self):
         '''
-            Попробуй избавится от таймера. И сделай примерно следующее:
-            1. Создаём пост
-            2. Получаем страницу клиентом
-            3. Получаем предполагаемый закешированный контент
-            4. Получаем пагинатор
-            5. Убеждаемся что там всего лишь одна страница
-            6. Получаем и проверяем соответствие контента
-            7. Удаляем пост
-            8. Тут же перезапрашиваем клиентом index
-            9. Сравниваем полученный контент с контентом с пункта 2
-            10. Чистим кеш cache.clear()
-            И повторяем пункты 8 и 9 колько уже через assertNotEqual
+            Проверяем работу кеширования страницы index
         '''
         new_post = Post.objects.create(
             text='Тест кэша ' * 15,
@@ -316,3 +312,7 @@ class CacheTest(PostViewTests, TestCase):
         paginator_after = page_after_del.paginator
         self.assertEqual(paginator_after.num_pages, 1)
         self.assertNotEqual(paginator_after.count, 3)
+
+
+class CommentViewsTests(PostViewTests, TestCase):
+    pass

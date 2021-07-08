@@ -39,7 +39,7 @@ urlpatterns = [
     path(
         '<str:username>/<int:post_id>/edit/',
         views.post_edit,
-        name='edit_post'
+        name='post_edit'
     ),
     path(
         '<str:username>/<int:post_id>/comment',
