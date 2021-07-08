@@ -4,7 +4,10 @@
 
 {% block content %}
   {% include 'mixins/menu.html' with follow=True %}
-
+  {% if not page.paginator.count %}
+    <h2>Вы еще не на кого не подписаны</h2>
+    <p>Чтобы подписаться перейдите в профайл избранного автора.</p>
+  {% endif %}
   {% for post in page %}
     {% include 'posts/post_item.html' with post=post%}
     {% if not forloop.last %}<hr>{% endif %}

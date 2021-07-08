@@ -6,11 +6,15 @@ from django.core.paginator import Paginator
 from django.db.models import Count
 from .forms import PostForm, CommentForm
 from django.views.decorators.cache import cache_page
+from django.core.cache import cache
 
 from .models import Post, Group, User, Follow
 
+PER_PAGE = 10
+
 
 def make_pagination(request, object_list, per_page):
+    cache.clear()
     paginator = Paginator(object_list, per_page)
     page_number = request.GET.get('page')
     return paginator.get_page(page_number)
