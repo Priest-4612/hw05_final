@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 
-from posts.models import Post, Group, User
+from posts.models import Post, Group, User, Follow, Comment
 
 
 @override_settings(MEDIA_ROOT=tempfile.mkdtemp(dir=settings.BASE_DIR))
@@ -55,6 +55,8 @@ class PostViewTests(TestCase):
         self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
+        self.other_client = Client()
+        self.other_client.force_login(self.other_user)
 
         self.template_url_names = {
             reverse('posts:index'): {
@@ -104,7 +106,7 @@ class PostViewTests(TestCase):
                 'redirect_page': (
                     '/auth/login/?next=/follow/'
                 ),
-            },
+            }
         }
 
     def test_index_page_shows_correct_context(self):
@@ -314,5 +316,142 @@ class CacheTests(PostViewTests, TestCase):
         self.assertNotEqual(paginator_after.count, 3)
 
 
+class FollowViewsTests(PostViewTests, TestCase):
+    '''
+    Авторизованный пользователь может подписываться на других пользователей
+    и удалять их из подписок.
+    '''
+    def test_profile_follow_redirect_anonymous(self):
+        address = reverse(
+            'posts:profile_follow',
+            kwargs={'username': self.user.username}
+        )
+        with self.subTest(address=address):
+            response = self.guest_client.get(
+                path=address,
+                follow=True
+            )
+            self.assertRedirects(
+                response,
+                (
+                    '/auth/login/?next=/'
+                    f'{self.user.username}/follow/'
+                )
+            )
+
+    def test_profile_follow_redirect_anonymous(self):
+        address = reverse(
+            'posts:profile_unfollow',
+            kwargs={'username': self.user.username}
+        )
+        with self.subTest(address=address):
+            response = self.guest_client.get(
+                path=address,
+                follow=True
+            )
+            self.assertRedirects(
+                response,
+                (
+                    '/auth/login/?next=/'
+                    f'{self.user.username}/unfollow/'
+                )
+            )
+
+    def test_profile_follow_autorized_user(self):
+        address = reverse(
+            'posts:profile_follow',
+            kwargs={'username': self.other_user.username}
+        )
+        follow_count_before = Follow.objects.all().count()
+        self.assertEqual(follow_count_before, 0)
+        response = self.authorized_client.get(address) # noqa
+        follow_count_after = Follow.objects.all().count()
+        self.assertEqual(follow_count_after, 1)
+
+    def test_profile_follow_autorized_user(self):
+        address = reverse(
+            'posts:profile_unfollow',
+            kwargs={'username': self.other_user.username}
+        )
+        Follow.objects.create(
+            user=self.user,
+            author=self.other_user
+        )
+        follow_count_before = Follow.objects.all().count()
+        self.assertEqual(follow_count_before, 1)
+        response = self.authorized_client.get(address) # noqa
+        follow_count_after = Follow.objects.all().count()
+        self.assertEqual(follow_count_after, 0)
+
+    def test_follow_correct_show(self):
+        '''
+        Новая запись пользователя появляется в ленте тех, кто на него подписан
+        и не появляется в ленте тех, кто не подписан на него.
+        '''
+        Follow.objects.create(
+            user=self.user,
+            author=self.other_user
+        )
+        Follow.objects.create(
+            user=self.other_user,
+            author=self.user
+        )
+        new_post = Post.objects.create(
+            text='text text text',
+            author=self.other_user
+        )
+        address = reverse('posts:follow_index')
+        response_following = self.authorized_client.get(address)
+        post_is_exists = new_post in response_following.context['page']
+        self.assertTrue(post_is_exists)
+        response_other = self.other_client.get(address)
+        post_is_not_exists = new_post not in response_other.context['page']
+        self.assertTrue(post_is_not_exists)
+
+
 class CommentViewsTests(PostViewTests, TestCase):
-    pass
+    '''
+    Только авторизированный пользователь может комментировать посты.
+    '''
+
+    def test_add_comment_redirect_anonymous(self):
+        address = reverse(
+            'posts:add_comment',
+            kwargs={
+                'username': self.user.username,
+                'post_id': self.post.pk
+            }
+        )
+        with self.subTest(address=address):
+            response = self.guest_client.get(
+                path=address,
+                follow=True
+            )
+            self.assertRedirects(
+                response,
+                (
+                    '/auth/login/?next=/'
+                    f'{self.user.username}/{self.post.pk}/comment'
+                )
+            )
+
+    def test_add_comment(self):
+        address = reverse(
+            'posts:add_comment',
+            kwargs={
+                'username': self.user.username,
+                'post_id': self.post.pk
+            }
+        )
+        form_data = {
+            'text': 'comment comment commetn'
+        }
+        self.authorized_client.post(
+            address,
+            data=form_data,
+            follow=True
+        )
+        comment_is_created = Comment.objects.filter(
+            text=form_data['text']
+        ).exists()
+        self.assertTrue(comment_is_created)
