@@ -284,7 +284,7 @@ class CacheTests(PostViewTests, TestCase):
         '''
         Проверяем наличее кешируемого фрагмента index_page на странице index
         '''
-        response = self.authorized_client.get(reverse('posts:index')) # noqa
+        self.authorized_client.get(reverse('posts:index'))
         key = make_template_fragment_key('index_page')
         self.assertTrue(key in cache)
 
@@ -364,7 +364,7 @@ class FollowViewsTests(PostViewTests, TestCase):
         )
         follow_count_before = Follow.objects.all().count()
         self.assertEqual(follow_count_before, 0)
-        response = self.authorized_client.get(address) # noqa
+        self.authorized_client.get(address)
         follow_count_after = Follow.objects.all().count()
         self.assertEqual(follow_count_after, 1)
 
@@ -379,7 +379,7 @@ class FollowViewsTests(PostViewTests, TestCase):
         )
         follow_count_before = Follow.objects.all().count()
         self.assertEqual(follow_count_before, 1)
-        response = self.authorized_client.get(address) # noqa
+        self.authorized_client.get(address)
         follow_count_after = Follow.objects.all().count()
         self.assertEqual(follow_count_after, 0)
 
