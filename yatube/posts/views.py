@@ -1,14 +1,13 @@
-from django.shortcuts import render, redirect
-from django.shortcuts import get_object_or_404
-from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db.models import Count
-from .forms import PostForm, CommentForm
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.cache import cache_page
-from django.core.cache import cache
 
-from .models import Post, Group, User, Follow
+from .forms import CommentForm, PostForm
+from .models import Follow, Group, Post, User
 
 PER_PAGE = 10
 

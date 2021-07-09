@@ -1,7 +1,6 @@
-from django.test import TestCase, Client
 from django.core.cache import cache
-
-from posts.models import Post, Group, User
+from django.test import Client, TestCase
+from posts.models import Group, Post, User
 
 
 class PostURLTests(TestCase):
