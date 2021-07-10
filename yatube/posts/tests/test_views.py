@@ -279,13 +279,13 @@ class PaginatorViewsTests(TestCase):
 
 
 class CacheTests(PostViewTests, TestCase):
-    def test_cache_exists(self):
-        '''
-        Проверяем наличее кешируемого фрагмента index_page на странице index
-        '''
-        self.authorized_client.get(reverse('posts:index'))
-        key = make_template_fragment_key('index_page')
-        self.assertTrue(key in cache)
+    # def test_cache_exists(self):
+    #     '''
+    #     Проверяем наличее кешируемого фрагмента index_page на странице index
+    #     '''
+    #     self.authorized_client.get(reverse('posts:index'))
+    #     key = make_template_fragment_key('index_page')
+    #     self.assertTrue(key in cache)
 
     def test_cached_index_page(self):
         '''

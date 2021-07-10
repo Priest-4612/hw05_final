@@ -1,5 +1,4 @@
 from django.contrib.auth.decorators import login_required
-from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
@@ -13,7 +12,6 @@ PER_PAGE = 10
 
 
 def make_pagination(request, object_list, per_page):
-    cache.clear()
     paginator = Paginator(object_list, per_page)
     page_number = request.GET.get('page')
     return paginator.get_page(page_number)
