@@ -3,7 +3,7 @@
 {% block header %}Избранные Авторы{% endblock %}
 
 {% block content %}
-  {% include 'mixins/menu.html' with follow=True %}
+  {% include 'includes/menu.html' with follow=True %}
   {% if not page.paginator.count %}
     <h2>Вы еще не на кого не подписаны</h2>
     <p>Чтобы подписаться перейдите в профайл избранного автора.</p>
@@ -13,5 +13,5 @@
     {% if not forloop.last %}<hr>{% endif %}
   {% endfor %}
 
-  {% include "mixins/paginator.html" with items=page paginator=paginator %}
+  {% include "includes/paginator.html" with items=page paginator=paginator %}
 {% endblock %}

@@ -5,14 +5,14 @@
 
 {% block content %}
   <div class="row">
-    {% include 'mixins/author_card.html' %}
+    {% include 'includes/author_card.html' %}
 
     <div class="col-md-9">
       {% for post in page %}
         {% include 'posts/post_item.html' %}
         {% if not forloop.last %}<hr>{% endif %}
       {% endfor %}
-      {% include "mixins/paginator.html" %}
+      {% include "includes/paginator.html" %}
     </div>
   </div>
 {% endblock content %}
