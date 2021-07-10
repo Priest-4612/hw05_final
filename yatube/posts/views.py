@@ -174,9 +174,11 @@ def post_edit(request, username, post_id):
 
 @login_required
 def follow_index(request):
-    user = request.user
-    followers = user.follower.values_list('author', flat=True)
-    post_list = Post.objects.filter(author__id__in=followers)
+    post_list = (
+        Post.objects.prefetch_related('author')
+                    .prefetch_related('author__following')
+                    .filter(author__following__user=request.user)
+    )
     page = make_pagination(request, post_list, 10)
     context = {'page': page}
     return render(request, 'posts/follow.html', context)
