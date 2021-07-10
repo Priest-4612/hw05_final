@@ -3,7 +3,6 @@ import tempfile
 
 from django.conf import settings
 from django.core.cache import cache
-# from django.core.cache.utils import make_template_fragment_key
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
@@ -279,13 +278,6 @@ class PaginatorViewsTests(TestCase):
 
 
 class CacheTests(PostViewTests, TestCase):
-    # def test_cache_exists(self):
-    #     '''
-    #     Проверяем наличее кешируемого фрагмента index_page на странице index
-    #     '''
-    #     self.authorized_client.get(reverse('posts:index'))
-    #     key = make_template_fragment_key('index_page')
-    #     self.assertTrue(key in cache)
 
     def test_cached_index_page(self):
         '''

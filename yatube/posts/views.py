@@ -30,7 +30,7 @@ def server_error(request):
     return render(request, 'errors/500.html', status=500)
 
 
-@cache_page(20)
+@cache_page(20, key_prefix='index_page')
 def index(request):
     post_list = Post.objects.all()
     page = make_pagination(request, post_list, 10)
